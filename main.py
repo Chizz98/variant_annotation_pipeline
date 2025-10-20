@@ -32,12 +32,24 @@ def query_feature_table(feature_table_fn: str, genes: list):
     :param genes:
     :return:
     """
-    out_dict = {}
+    gene_dict = {}
+    protein_dict = {}
 
     with open(feature_table_fn, "r") as infile:
         for line in infile:
             line = line.strip().split("\t")
-            print(line)
+            gene_name = line[14]
+            feature = line[0]
+            if gene_name in genes:
+                gene = list(set(line) & set(genes))[0]
+                chr, start_pos, stop_pos = line[6:9]
+                if feature == "gene":
+                    gene_dict[gene] = [chr, start_pos, stop_pos]
+                if feature == "mRNA":
+                    protein_id = line[12]
+                    mrna_id = line[10]
+                    protein_dict[protein_id] = [gene, mrna_id, chr, start_pos, stop_pos]
+    return (gene_dict, protein_dict)
 
 
 def extract_gene(
@@ -138,7 +150,7 @@ def var_snpeff_to_provean(snpeff_var: str) -> str:
         start = m_del.group(2)
         end = m_del.group(4) if m_del.group(4) else start
         variant = f"DEL{start}" if start == end \
-            else f"DEL{start}-{end}"
+            else f"DEL{start}_{end}"
 
     # Insertion
     m_ins = re.match(
@@ -151,9 +163,37 @@ def var_snpeff_to_provean(snpeff_var: str) -> str:
         inserted_aa_3 = re.findall(r"[A-Z][a-z]{2}", m_ins.group(5))
         inserted_aa_1 = ''.join(
             [aa_lut[aa] for aa in inserted_aa_3])
-        variant = f"INS{start}-{end}:{inserted_aa_1}"
-
+        variant = f"INS{start}_{end}:{inserted_aa_1}"
     return variant
+
+
+def extract_protein_sequences(protein_fa_fn: str, protein_ids: list, out_fn: str):
+    in_prot_of_interest = False
+    out_lines = []
+    out_dict = {}
+    with open(protein_fa_fn, "r") as infile:
+        for line in infile:
+            if line.startswith(">"):
+                fasta_header = line.strip().split(" ")
+                protein_id = fasta_header[0].replace(">", "")
+                if protein_id in protein_ids:
+                    in_prot_of_interest = True
+                    out_dict[protein_id] = line.strip()
+                    line = f">{protein_id}\n"
+                else:
+                    in_prot_of_interest = False
+            if in_prot_of_interest:
+                out_lines.append(line)
+    with open(out_fn, "w") as outfile:
+        for line in out_lines:
+            outfile.write(line)
+    return out_dict
+
+
+def write_regions_file(gene_dict: dict, out_fn: str):
+    with open(out_fn, "w") as outfile:
+        for value in gene_dict.values():
+            outfile.write("\t".join(value) + "\n")
 
 
 def main():
@@ -167,7 +207,43 @@ def main():
         os.mkdir(protein_dir)
 
     # Parse input file
-    parse_gene_tsv("genes.txt")
+    gene_list = parse_gene_tsv("genes_test.txt")
+    
+    # Parse feature table
+    gene_dict, protein_dict = query_feature_table("../GCF_002870075.3_Lsat_Salinas_v8_feature_table.txt", gene_list)
+    
+    # Extract protein sequences
+    protein_fa = "proteins/protein.fa"
+    
+    protein_fasta_lut = extract_protein_sequences("../GCF_002870075.3_Lsat_Salinas_v8_protein.faa", list(protein_dict.keys()), protein_fa)
+    
+    # Extract regions of interest from annotated vcf
+    regions_file = "genes/regions.txt"
+    input_vcf = "../Lser_200_filtered_missing_lt100_het_lt20.ann.vcf.gz"
+    out_vcf = "genes/test.ann.vcf"
+
+    write_regions_file(gene_dict, regions_file)
+    bcftools_cmd = f"bcftools view -R {regions_file} {input_vcf} -o {out_vcf}"
+    subprocess.run(bcftools_cmd, shell=True)
+    
+    # Write provean variant file
+    prov_variant_file = "proteins/provean_vars.txt"
+    
+    out_dict = parse_snpeff_to_provean(out_vcf)
+    with open(prov_variant_file, "w") as outfile:
+        for mrna_id, prov_variants in out_dict.items():
+            protein_id_match = None
+            for protein_id, prot_vals in protein_dict.items():
+                if mrna_id in prot_vals:
+                    protein_id_match = protein_id
+            if protein_id_match is not None:
+                for variant in prov_variants:
+                    if variant is not None:
+                        outfile.write(f"{protein_id_match}\t{variant}\n")
+    
+    # Run interpro query
+    interpro_cmd = f"interproscan.sh -i {protein_fa} -f tsv -dp -appl Pfam"
+    #subprocess.run(interpro_cmd, shell=True)
 
     """
     # Extract genes
