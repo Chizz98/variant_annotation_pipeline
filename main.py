@@ -7,7 +7,7 @@ import gzip
 import re
 
 
-def parse_gene_tsv(gene_vcf_fn) -> list:
+def parse_gene_tsv(gene_vcf_fn: str) -> list:
     """ Reads gene name, position, and start and end positions from a csv
 
     :param gene_vcf_fn: Filename of the input csv
@@ -23,6 +23,21 @@ def parse_gene_tsv(gene_vcf_fn) -> list:
             if gene.startswith("LOC"):
                 out_list.append(gene)
     return out_list
+
+
+def query_feature_table(feature_table_fn: str, genes: list):
+    """
+
+    :param feature_table_fn:
+    :param genes:
+    :return:
+    """
+    out_dict = {}
+
+    with open(feature_table_fn, "r") as infile:
+        for line in infile:
+            line = line.strip().split("\t")
+            print(line)
 
 
 def extract_gene(
