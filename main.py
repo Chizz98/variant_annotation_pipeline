@@ -11,7 +11,7 @@ def parse_gene_tsv(gene_vcf_fn: str) -> list:
     """ Reads gene name, position, and start and end positions from a csv
 
     :param gene_vcf_fn: Filename of the input csv
-    :return: list of gene names
+    :return: List of gene names
     """
     out_list = []
 
@@ -25,12 +25,17 @@ def parse_gene_tsv(gene_vcf_fn: str) -> list:
     return out_list
 
 
-def query_feature_table(feature_table_fn: str, genes: list):
-    """
+def query_feature_table(
+        feature_table_fn: str,
+        genes: list
+) -> tuple[dict, dict]:
+    """ Queries an NCBI feature table to extract gene information
 
-    :param feature_table_fn:
-    :param genes:
-    :return:
+    :param feature_table_fn: Filename of the NCBI feature table
+    :param genes: List of genes to extract from the feature table
+    :return: A dictionary with gene names input and the chr, start and stop as
+        values. A dictionary with protein ids as the key and gene, mrna, chr,
+        start and stop as values
     """
     gene_dict = {}
     protein_dict = {}
@@ -48,8 +53,10 @@ def query_feature_table(feature_table_fn: str, genes: list):
                 if feature == "mRNA":
                     protein_id = line[12]
                     mrna_id = line[10]
-                    protein_dict[protein_id] = [gene, mrna_id, chr, start_pos, stop_pos]
-    return (gene_dict, protein_dict)
+                    protein_dict[protein_id] = [
+                        gene, mrna_id, chr, start_pos, stop_pos
+                    ]
+    return gene_dict, protein_dict
 
 
 def extract_gene(
@@ -167,7 +174,18 @@ def var_snpeff_to_provean(snpeff_var: str) -> str:
     return variant
 
 
-def extract_protein_sequences(protein_fa_fn: str, protein_ids: list, out_fn: str):
+def extract_protein_sequences(
+        protein_fa_fn: str,
+        protein_ids: list,
+        out_fn: str
+) -> None:
+    """ Extracts protein sequences from a protein fasta
+
+    :param protein_fa_fn: input fasta with protein sequences.
+    :param protein_ids: list of proteins to extract from the input fasta.
+    :param out_fn: filename to write the output fasta to.
+    :return: None, writes outfile
+    """
     in_prot_of_interest = False
     out_lines = []
     out_dict = {}
@@ -190,7 +208,13 @@ def extract_protein_sequences(protein_fa_fn: str, protein_ids: list, out_fn: str
     return out_dict
 
 
-def write_regions_file(gene_dict: dict, out_fn: str):
+def write_regions_file(gene_dict: dict, out_fn: str) -> None:
+    """ Writes a regions file to be parsed by bcftools
+
+    :param gene_dict: first dictionary output by query_feature_table
+    :param out_fn: name of the output file
+    :return: None, writes an output file
+    """
     with open(out_fn, "w") as outfile:
         for value in gene_dict.values():
             outfile.write("\t".join(value) + "\n")
@@ -210,12 +234,19 @@ def main():
     gene_list = parse_gene_tsv("genes_test.txt")
     
     # Parse feature table
-    gene_dict, protein_dict = query_feature_table("../GCF_002870075.3_Lsat_Salinas_v8_feature_table.txt", gene_list)
+    gene_dict, protein_dict = query_feature_table(
+        "../GCF_002870075.3_Lsat_Salinas_v8_feature_table.txt",
+        gene_list
+    )
     
     # Extract protein sequences
     protein_fa = "proteins/protein.fa"
     
-    protein_fasta_lut = extract_protein_sequences("../GCF_002870075.3_Lsat_Salinas_v8_protein.faa", list(protein_dict.keys()), protein_fa)
+    extract_protein_sequences(
+        "../GCF_002870075.3_Lsat_Salinas_v8_protein.faa",
+        list(protein_dict.keys()),
+        protein_fa
+    )
     
     # Extract regions of interest from annotated vcf
     regions_file = "genes/regions.txt"
