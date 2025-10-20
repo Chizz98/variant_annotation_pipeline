@@ -274,7 +274,7 @@ def main():
     
     # Run interpro query
     interpro_cmd = f"interproscan.sh -i {protein_fa} -f tsv -dp -appl Pfam"
-    #subprocess.run(interpro_cmd, shell=True)
+    subprocess.run(interpro_cmd, shell=True)
 
     """
     # Extract genes
