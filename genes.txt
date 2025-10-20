@@ -1,0 +1,110 @@
+Gene	Homolog in sativa	LOC	Chr nr	Chr name	Position start	Position end	Name	Notes			
+FHY3	YES	LOC111884820	8	NC_056630.1	42810332	42815235					
+"PHT1;1"		LOC111891092	3	NC_056625.1	203233469	203236535	inorganic phosphate transporter 1	"All PHT1 or all PHT1;1 and no homologs for PHT1;2 and 1;3. Annotation is confusing. Might also be because PHT1;1-3 are very similar so cannot be annotated separately"			
+		LOC111917841	3	NC_056625.1	204,060,629	204,065,881	inorganic phosphate transporter 1	All PHT1 are similar in sequence			
+		LOC111891085	3	NC_056625.1	202,890,674	202,893,223	inorganic phosphate transporter 1				
+		LOC111891098	3	NC_056625.1	203,037,097	203,040,567	inorganic phosphate transporter 1				
+"PHT1;1-like"		LOC111891099	3	NC_056625.1	203,006,078	203,008,616	inorganic phosphate transporter 1-like				
+"PHT1;2"	NO?										
+"PHT1;3"	NO?										
+"PHT1;4"	YES	LOC111881178	9	NC_056631.1	11927648	11929267	inorganic phosphate transporter 1-4				
+		LOC111902494	5	NC_056627.1	328149160	328151120	inorganic phosphate transporter 1-4				
+		LOC111891554	5	NC_056627.1	328110409	328112178	inorganic phosphate transporter 1-4				
+		LOC111876406	8	NC_056630.1	7,769,203	7,770,875	low affinity inorganic phosphate transporter 4				
+"PHT4;1-like"		LOC122194425	8	NC_056630.2	7,776,062	7,778,066	low affinity inorganic phosphate transporter 4-like				
+"PHT1;5"	NO?										
+"PHT1;6"	NO?										
+"PHT2;1"	YES	LOC111882280	8	NC_056630.2	260799222	260802247					
+"PHT3;1 or 3;2"	YES	LOC111888770	2	NC_056624.1	172,071,830	172,074,424	MPT3	Also two calcium-dependent mitochondrial ATP-magnesium/phosphate carrier protein 3 but I dont know if this is the same probably not			
+		LOC111920142	1	NC_056623.1	34,757,028	34,759,966					
+		LOC111906468	5	NC_056627.1	20,402,493	20,404,721					
+		LOC111895429	4	NC_056626.1	135,173,848	135,176,390					
+"PHT3;3"	YES	LOC111888324	3	NC_056625.1	61,600,869	61,602,634	MPT1	Also a calcium-dependent mitochondrial ATP-magnesium/phosphate carrier protein 1 but I dont know if this is the same probably not (LOC111888255)			
+"PHT4;1"	YES	LOC111887307	5	NC_056627.1	313,947,191	313,950,333	sodium dependent P transporter				
+"PHT4;2"	YES	LOC111906761	9	NC_056631.1	39,406,969	39,410,921	Probable anion transporter 3, chloroplastic				
+							Ascorbate transporter				
+PHR1	YES						Phosphorus starvation response 1				
+PHL1											
+PHL2	YES	LOC111915887	1	NC_056623.1	85,583,358	85,585,878					
+PHO2	YES	LOC111917331	4	NC_056626.1	78,939,084	78,944,075					
+NLA	YES	LOC111891515	4	NC_056626.1	342,026,753	342,027,758					
+		LOC111896129	8	NC_056630.1	75,633,501	75,637,335					
+		LOC111920254	9	NC_056631.1	4,073,738	4,076,062					
+"PHT5;1"											
+"PHT5;3"	YES	LOC111920788	3	NC_056625.1	8,035,733	8,039,631					
+											
+											
+MYB62	NO										
+ARF4	YES	LOC111899867	2	NC_056624.1	177,742,867	177,747,132					
+		LOC111877506	6	NC_056628.1	63,952,847	63,958,452					
+ARF7	NO	X	X	X	X	X					
+ARF10	NO	X	X	X	X	X					
+bZIP11	YES but too many										
+MYB2											
+MYB4-7D											
+WRKY75	YES	LOC111889902	4	NC_056626.1	3,298,813	3,300,101					
+		LOC111911889	8	NC_056630.1	250,529,370	250,530,879					
+		LOC111919362	3	NC_056625.1	40,872,580	40,874,489					
+WRKY45	NO	X	X	X	X	X					
+WRKY42	NO	X	X	X	X	X					
+WRKY6	YES	LOC111907870	4	NC_056626.1	93,445,824	93,448,094					
+	(weird statement)	LOC111905659	9	NC_056631.1	173,932,614	173,935,290		The sequence of the model RefSeq protein was modified relative to this genomic sequence to represent the inferred CDS: added 35 bases not found in genome assembly			
+SPX1	YES	LOC111887194	5	NC_056627.1	211,182,470	211,184,832					
+		LOC111893343	7	NC_056629.1	60,139,493	60,141,541					
+SPX2 (result in SPX1)	YES?	LOC111911904	1	NC_056623.1	52,016,393	52,018,056					
+		LOC111907445	4	NC_056626.1	145,915,099	145,916,153			Not from BLAST		
+SPX3	YES	LOC111907732	3	NC_056625.1	223,177,007	..223,179,047					
+"SPX4;1"	YES	LOC111893961	4	NC_056626.1	343,319,285	343,321,722					
+AAD	NO										
+PSTOL1	NO										
+AVP1	YES	LOC111908368	8	NC_056630.1	88,182,851	88,186,432					
+		LOC111877800	7	NC_056629.1	60,962,661	60,967,716					
+		LOC111881873	5	NC_056627.1	204,590,580	204,595,606					
+		LOC111898903	4	NC_056626.1	142,514,645	142,518,854					
+		LOC111910058	1	NC_056630.1	37,762,681	37,765,870					
+LRT1	NO										
+MATE											
+TIR1											
+PAP10											
+PAP26											
+PAP3											
+PDR2											
+LPR2											
+STOP1	YES										
+											
+LPR1											
+ALMT1											
+PHO3											
+PTF1											
+ZAT6											
+PHO1											
+GLK1											
+PHF1											
+BHLH32											
+ARSK1											
+RAPTOR1B											
+TOR1											
+IRT1											
+BZR1											
+TOR											
+BIN2											
+EIN2											
+CRE1											
+ACS2											
+ACS4											
+ACS6											
+EIN3											
+EIL1											
+RSL4											
+ARR1											
+ARR12											
+MYB52											
+ACP1											
+At4											
+DGD1											
+SQD1											
+TPT											
+XPT											
+PPT											
+PERK13											
+AL6											
