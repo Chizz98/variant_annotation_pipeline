@@ -265,6 +265,26 @@ def write_regions_file(gene_dict: dict, out_fn: str) -> None:
             outfile.write("\t".join(value) + "\n")
 
 
+def parse_db_config(config_fn: str) -> dict:
+    """
+
+    :param config_fn:
+    :return:
+    """
+    out_dict = {}
+    with open(config_fn) as infile:
+        for line in infile:
+            line = line.strip().split("\t")
+            db_name = line[0]
+            protein_url = line[1]
+            feature_url = line[2]
+            out_dict[db_name] = {
+                "protein_url": protein_url,
+                "feature_url": feature_url
+            }
+    return out_dict
+
+
 def main():
     script_dir = pathlib.Path(__file__).resolve().parent
     db_dir = os.path.join(script_dir, "databases")
@@ -285,10 +305,23 @@ def main():
 
     curr_db_dir = os.path.join(db_dir, database)
     if not os.path.exists(curr_db_dir):
-        os.mkdir(curr_db_dir)
+        config_dbs = parse_db_config(
+            os.path.join(script_dir, "database.config")
+        )
+        if database in config_dbs:
+            os.mkdir(curr_db_dir)
+            protein_url, feature_url = config_dbs[database]
+            prot_cmd = f"wget -O {os.path.join(curr_db_dir, 'proteins.fa')} " \
+                       f"{protein_url}"
+            feat_cmd = f"wget -O {os.path.join(curr_db_dir, 'features.txt')} " \
+                       f"{feature_url}"
+            print(prot_cmd)
+            print(feat_cmd)
 
+    # If db does not exist, check for it in config, if there, make db
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
+
 
     regions_file = os.path.join(out_dir, "regions.txt")
     out_vcf = os.path.join(out_dir, "genes.vcf")
