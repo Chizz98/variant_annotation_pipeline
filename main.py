@@ -317,8 +317,10 @@ def main():
                        f"{protein_url}"
             feat_cmd = f"wget -O {os.path.join(curr_db_dir, 'features.txt')} " \
                        f"{feature_url}"
-            print(prot_cmd)
-            print(feat_cmd)
+            subprocess.run(prot_cmd, shell=True)
+            subprocess.run(feat_cmd, shell=True)
+        else:
+            raise Exception(f"Database {database} not found in database.config")
 
     # If db does not exist, check for it in config, if there, make db
     if not os.path.exists(out_dir):
