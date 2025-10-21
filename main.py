@@ -295,23 +295,6 @@ def main():
     write_regions_file(gene_dict, regions_file)
     bcftools_cmd = f"bcftools view -R {regions_file} {input_vcf} -o {out_vcf}"
     subprocess.run(bcftools_cmd, shell=True)
-
-    """
-    # Write provean variant file
-    prov_variant_file = "proteins/provean_vars.txt"
-    
-    out_dict = parse_snpeff_to_provean(out_vcf)
-    with open(prov_variant_file, "w") as outfile:
-        for mrna_id, prov_variants in out_dict.items():
-            protein_id_match = None
-            for protein_id, prot_vals in protein_dict.items():
-                if mrna_id in prot_vals:
-                    protein_id_match = protein_id
-            if protein_id_match is not None:
-                for variant in prov_variants:
-                    if variant is not None:
-                        outfile.write(f"{protein_id_match}\t{variant}\n")
-    """
     
     # Run interpro query
     if run_interpro:
