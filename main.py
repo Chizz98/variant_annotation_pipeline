@@ -306,7 +306,9 @@ def main():
         os.mkdir(db_dir)
 
     curr_db_dir = os.path.join(db_dir, database)
-    if not os.path.exists(curr_db_dir):
+    prot_fn = os.path.join(curr_db_dir, 'proteins.fa')
+    feat_fn = os.path.join(curr_db_dir, 'features.txt')
+    if not (os.path.exists(prot_fn) & os.path.exists(feat_fn)):
         config_dbs = parse_db_config(
             os.path.join(script_dir, "database.config")
         )
@@ -314,12 +316,10 @@ def main():
             os.mkdir(curr_db_dir)
             protein_url = config_dbs[database]["protein_url"]
             feature_url = config_dbs[database]["feature_url"]
-            prot_fn = os.path.join(curr_db_dir, 'proteins.fa')
-            feat_fn = os.path.join(curr_db_dir, 'features.txt')
 
             # Download data
-            prot_cmd = f"wget -O {prot_fn} {protein_url}"
-            feat_cmd = f"wget -O {feat_fn} {feature_url}"
+            prot_cmd = f"wget -O {prot_fn + '.gz'} {protein_url}"
+            feat_cmd = f"wget -O {feat_fn + '.gz'} {feature_url}"
             subprocess.run(prot_cmd, shell=True)
             subprocess.run(feat_cmd, shell=True)
 
