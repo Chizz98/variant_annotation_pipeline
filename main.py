@@ -276,7 +276,7 @@ def parse_db_config(config_fn: str) -> dict:
         for line in infile:
             if line.startswith("#"):
                 continue
-            line = line.strip().split("\t")
+            line = line.strip().split()
             db_name = line[0]
             protein_url = line[1]
             feature_url = line[2]
