@@ -313,12 +313,19 @@ def main():
         if database in config_dbs:
             os.mkdir(curr_db_dir)
             protein_url, feature_url = config_dbs[database]
-            prot_cmd = f"wget -O {os.path.join(curr_db_dir, 'proteins.fa')} " \
-                       f"{protein_url}"
-            feat_cmd = f"wget -O {os.path.join(curr_db_dir, 'features.txt')} " \
-                       f"{feature_url}"
+            prot_fn = os.path.join(curr_db_dir, 'proteins.fa')
+            feat_fn = os.path.join(curr_db_dir, 'features.txt')
+
+            # Download data
+            prot_cmd = f"wget -O {prot_fn} {protein_url}"
+            feat_cmd = f"wget -O {feat_fn} {feature_url}"
             subprocess.run(prot_cmd, shell=True)
             subprocess.run(feat_cmd, shell=True)
+
+            # Unzip data
+            subprocess.run(f"gunzip {prot_fn}")
+            subprocess.run(f"gunzip {feat_fn}")
+
         else:
             raise Exception(f"Database {database} not found in database.config")
 
