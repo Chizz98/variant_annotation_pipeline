@@ -313,7 +313,8 @@ def main():
             os.path.join(script_dir, "database.config")
         )
         if database in config_dbs:
-            os.mkdir(curr_db_dir)
+            if not os.path.exists(curr_db_dir):
+                os.mkdir(curr_db_dir)
             protein_url = config_dbs[database]["protein_url"]
             feature_url = config_dbs[database]["feature_url"]
 
