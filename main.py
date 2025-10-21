@@ -315,8 +315,9 @@ def main():
     
     # Run interpro query
     if run_interpro:
-        interpro_cmd = f"interproscan.sh -i {protein_fa} -f tsv -dp -appl Pfam" \
-                       f"-o {os.path.join(out_dir, 'interpro_results.tsv')}"
+        interpro_cmd = f"interproscan.sh -i {protein_fa} -f tsv -dp " \
+                       f"-appl Pfam -o " \
+                       f"{os.path.join(out_dir, 'interpro_results.tsv')}"
         subprocess.run(interpro_cmd, shell=True)
 
 
