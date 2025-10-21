@@ -266,8 +266,8 @@ def main():
     input_vcf = args.vcf
     feature_table = args.feature_table
     all_protein_fa = args.protein_fasta
-    run_interpro = args.i
-    out_dir = args.o
+    run_interpro = args.interproscan
+    out_dir = args.out_dir
 
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
