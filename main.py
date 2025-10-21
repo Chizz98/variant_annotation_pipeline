@@ -274,6 +274,7 @@ def parse_db_config(config_fn: str) -> dict:
     out_dict = {}
     with open(config_fn) as infile:
         for line in infile:
+            print(line)
             line = line.strip().split("\t")
             db_name = line[0]
             protein_url = line[1]
