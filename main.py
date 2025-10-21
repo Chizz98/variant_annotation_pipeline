@@ -5,6 +5,45 @@ import os
 import subprocess
 import gzip
 import re
+import argparse as arg
+
+
+def arg_reader():
+    """ Reads arguments from command line
+
+    :return class containing the arguments
+    """
+    arg_parser = arg.ArgumentParser(
+        description="Takes a list of genes and isolates the regions spanning "
+                    "the mRNA from the input VCF. Also isolates protein "
+                    "sequences and optionally runs those through interproscan."
+    )
+    arg_parser.add_argument(
+        "vcf",
+        help="The input vcf file"
+    )
+    arg_parser.add_argument(
+        "feature_table",
+        help="Filename of feature table for your organism, downloadable from "
+             "NCBI."
+    )
+    arg_parser.add_argument(
+        "protein_fasta",
+        help="Fasta file containing the protein sequences of your organism."
+    )
+    arg_parser.add_argument(
+        "-o",
+        "--out_dir",
+        default="./out",
+        help="The output directory to write files to, ./out by default."
+    )
+    arg_parser.add_argument(
+        "-i",
+        "--interproscan",
+        action="store_true",
+        help="If set, runs interproscan on all proteins (just pfam for now)."
+    )
+    return arg_parser.parse_args()
 
 
 def parse_gene_tsv(gene_vcf_fn: str) -> list:
@@ -222,41 +261,42 @@ def write_regions_file(gene_dict: dict, out_fn: str) -> None:
 
 def main():
     # Get cmd arguments
+    args = arg_reader()
 
-    gene_dir = "genes"
-    protein_dir = "proteins"
-    if not os.path.exists(gene_dir):
-        os.mkdir(gene_dir)
-    if not os.path.exists(protein_dir):
-        os.mkdir(protein_dir)
+    input_vcf = args.vcf
+    feature_table = args.feature_table
+    all_protein_fa = args.protein_fasta
+    run_interpro = args.i
+    out_dir = args.o
+
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
+
+    regions_file = os.path.join(out_dir, "regions.txt")
+    out_vcf = os.path.join(out_dir, "genes.vcf")
 
     # Parse input file
     gene_list = parse_gene_tsv("genes_test.txt")
     
     # Parse feature table
     gene_dict, protein_dict = query_feature_table(
-        "../GCF_002870075.3_Lsat_Salinas_v8_feature_table.txt",
+        feature_table,
         gene_list
     )
-    
-    # Extract protein sequences
-    protein_fa = "proteins/protein.fa"
-    
+
+    protein_fa = os.path.join(out_dir, "proteins.fa")
     extract_protein_sequences(
-        "../GCF_002870075.3_Lsat_Salinas_v8_protein.faa",
+        all_protein_fa,
         list(protein_dict.keys()),
         protein_fa
     )
     
     # Extract regions of interest from annotated vcf
-    regions_file = "genes/regions.txt"
-    input_vcf = "../Lser_200_filtered_missing_lt100_het_lt20.ann.vcf.gz"
-    out_vcf = "genes/test.ann.vcf"
-
     write_regions_file(gene_dict, regions_file)
     bcftools_cmd = f"bcftools view -R {regions_file} {input_vcf} -o {out_vcf}"
     subprocess.run(bcftools_cmd, shell=True)
-    
+
+    """
     # Write provean variant file
     prov_variant_file = "proteins/provean_vars.txt"
     
@@ -271,18 +311,12 @@ def main():
                 for variant in prov_variants:
                     if variant is not None:
                         outfile.write(f"{protein_id_match}\t{variant}\n")
+    """
     
     # Run interpro query
-    interpro_cmd = f"interproscan.sh -i {protein_fa} -f tsv -dp -appl Pfam"
-    subprocess.run(interpro_cmd, shell=True)
-
-    """
-    # Extract genes
-    extract_gene("CHR", 12, 13, "infile", "outfile", True)
-
-    # Write provean variant file
-    parse_snpeff_to_provean("test_gene.ann.vcf")
-    """
+    if run_interpro:
+        interpro_cmd = f"interproscan.sh -i {protein_fa} -f tsv -dp -appl Pfam"
+        subprocess.run(interpro_cmd, shell=True)
 
 
 if __name__ == "__main__":
