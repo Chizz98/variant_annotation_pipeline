@@ -312,7 +312,8 @@ def main():
         )
         if database in config_dbs:
             os.mkdir(curr_db_dir)
-            protein_url, feature_url = config_dbs[database]
+            protein_url = config_dbs[database]["protein_url"]
+            feature_url = config_dbs[database]["feature_url"]
             prot_fn = os.path.join(curr_db_dir, 'proteins.fa')
             feat_fn = os.path.join(curr_db_dir, 'features.txt')
 
