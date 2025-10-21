@@ -324,8 +324,8 @@ def main():
             subprocess.run(feat_cmd, shell=True)
 
             # Unzip data
-            subprocess.run(f"gunzip {prot_fn}")
-            subprocess.run(f"gunzip {feat_fn}")
+            subprocess.run(f"gunzip {prot_fn + '.gz'}")
+            subprocess.run(f"gunzip {feat_fn + '.gz'}")
 
         else:
             raise Exception(f"Database {database} not found in database.config")
