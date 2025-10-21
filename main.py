@@ -266,18 +266,26 @@ def write_regions_file(gene_dict: dict, out_fn: str) -> None:
 
 
 def main():
+    script_dir = pathlib.Path(__file__).resolve().parent
+    db_dir = os.path.join(script_dir, "databases")
+
     # Get cmd arguments
     args = arg_reader()
 
     input_vcf = args.vcf
     database = args.database
-    print(pathlib.Path(__file__).resolve().parent)
-
-
     feature_table = args.feature_table
     all_protein_fa = args.protein_fasta
     run_interpro = args.interproscan
     out_dir = args.out_dir
+
+    # Database logic
+    if not os.path.exists(db_dir):
+        os.mkdir(db_dir)
+
+    curr_db_dir = os.path.join(db_dir, database)
+    if not os.path.exists(curr_db_dir):
+        os.mkdir(curr_db_dir)
 
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
