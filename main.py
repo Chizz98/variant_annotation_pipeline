@@ -6,6 +6,7 @@ import subprocess
 import gzip
 import re
 import argparse as arg
+import pathlib
 
 
 def arg_reader():
@@ -30,6 +31,11 @@ def arg_reader():
     arg_parser.add_argument(
         "protein_fasta",
         help="Fasta file containing the protein sequences of your organism."
+    )
+    arg_parser.add_argument(
+        "-d",
+        "--database",
+        help="Internal database to query"
     )
     arg_parser.add_argument(
         "-o",
@@ -264,6 +270,10 @@ def main():
     args = arg_reader()
 
     input_vcf = args.vcf
+    database = args.database
+    print(pathlib.Path(__file__).resolve().parent)
+
+
     feature_table = args.feature_table
     all_protein_fa = args.protein_fasta
     run_interpro = args.interproscan
