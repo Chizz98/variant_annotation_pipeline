@@ -1,0 +1,4 @@
+Gene	Homolog in sativa	LOC	Chr nr	Chr name	Position start	Position end	Name	Notes
+"PHT1;4"	YES	LOC111881178	9	NC_056631.1	11927648	11929267	inorganic phosphate transporter 1-4	
+"PHT2;1"	YES	LOC111882280	8	NC_056630.2	260799222	260802247		
+FHY3	YES	LOC111884820	8	NC_056630.1	42810332	42815235		
