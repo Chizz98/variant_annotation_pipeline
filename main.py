@@ -52,7 +52,7 @@ def arg_reader():
         action="store_true",
         help="If set, runs interproscan on all proteins (just pfam for now)."
     )
-    return arg_parser.parse_args()
+    return arg_parser
 
 
 def parse_gene_tsv(gene_vcf_fn: str) -> list:
@@ -331,7 +331,8 @@ def main():
     db_dir = os.path.join(script_dir, "databases")
 
     # Get cmd arguments
-    args = arg_reader()
+    arg_parser = arg_reader()
+    args = arg_parser.parse_args()
 
     input_vcf = args.vcf
     database = args.database
@@ -339,12 +340,12 @@ def main():
     out_dir = args.out_dir
 
     if bool(args.protein_fasta) != bool(args.feature_table):
-        raise Exception("-f and -p have to be submitted together")
+        arg_parser.error("-f and -p have to be submitted together")
     if args.protein_fasta is not None and args.feature_table is not None:
         all_protein_fa = args.protein_fasta
         feature_table = args.feature_table
         if database:
-            raise Exception("-f and -p options are incompatible with -d")
+            arg_parser.error("-f and -p options are incompatible with -d")
     else:
         if not os.path.exists(db_dir):
             os.mkdir(db_dir)
