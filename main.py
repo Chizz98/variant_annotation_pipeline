@@ -280,10 +280,11 @@ def write_regions_file(gene_dict: dict, out_fn: str) -> None:
 
 
 def parse_db_config(config_fn: str) -> dict:
-    """
+    """ Parser for database.config file
 
-    :param config_fn:
-    :return:
+    :param config_fn: name of the config file
+    :return: dictionary containing the database name as keys and the related
+        urls as values.
     """
     out_dict = {}
     with open(config_fn) as infile:
@@ -302,12 +303,13 @@ def parse_db_config(config_fn: str) -> dict:
 
 
 def database_handler(script_dir: str, curr_db_dir: str, database: str):
-    """
+    """ Handles the logic for checking for and retrieving databases
 
-    :param database:
-    :param script_dir:
-    :param curr_db_dir:
-    :return:
+    :param database: Database name as in config / databases folder in project
+    :param script_dir: The dir the project is in
+    :param curr_db_dir: The dir of the provided database
+    :return: filenames of the protein fasta and feature table in the provided
+        database.
     """
     all_protein_fa = os.path.join(curr_db_dir, 'proteins.fa')
     feature_table = os.path.join(curr_db_dir, 'features.txt')
