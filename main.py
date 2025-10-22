@@ -336,7 +336,7 @@ def main():
     run_interpro = args.interproscan
     out_dir = args.out_dir
 
-    if args.protein_fasta is not None is not args.feature_table is not None:
+    if bool(args.protein_fasta) != bool(args.feature_table):
         raise Exception("-f and -p have to be submitted together")
     if args.protein_fasta is not None and args.feature_table is not None:
         all_protein_fa = args.protein_fasta
