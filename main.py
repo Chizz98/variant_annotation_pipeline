@@ -33,7 +33,6 @@ def arg_reader():
     database_group = database_group_top.add_mutually_exclusive_group(
         required=True
     )
-
     database_group.add_argument(
         "-f", "--feature_table",
         help="Filename of feature table for your organism, downloadable from "
@@ -51,6 +50,27 @@ def arg_reader():
         "--database",
         help="Internal database to query, mutually exclusive with -f and -p."
     )
+
+    gene_input_group_top = arg_parser.add_argument_group(
+        title="Gene input",
+        description="Mode to provide genes."
+    )
+    gene_input_group = gene_input_group_top.add_mutually_exclusive_group(
+        required=True
+    )
+    gene_input_group.add_argument(
+        "-g",
+        "-genes",
+        help="Comma separated list of genes (or a single gene). No spaces "
+             "between gene names."
+    )
+    gene_input_group.add_argument(
+        "-G",
+        "-gene_file",
+        help="Name of a file containing the gene names, with each line "
+             "containing one gene name."
+    )
+
     arg_parser.add_argument(
         "-o",
         "--out_dir",
