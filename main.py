@@ -21,21 +21,22 @@ def arg_reader():
     )
     arg_parser.add_argument(
         "vcf",
-        help="The input vcf file"
+        help="The input vcf file."
     )
     arg_parser.add_argument(
-        "feature_table",
+        "-f", "--feature_table",
         help="Filename of feature table for your organism, downloadable from "
-             "NCBI."
+             "NCBI. Mutually exclusive with -d."
     )
     arg_parser.add_argument(
-        "protein_fasta",
+        "-p", "--protein_fasta",
         help="Fasta file containing the protein sequences of your organism."
+             "Mutually exclusive with -d"
     )
     arg_parser.add_argument(
         "-d",
         "--database",
-        help="Internal database to query"
+        help="Internal database to query, mutually exclusive with -f and -p."
     )
     arg_parser.add_argument(
         "-o",
@@ -287,28 +288,17 @@ def parse_db_config(config_fn: str) -> dict:
     return out_dict
 
 
-def main():
-    script_dir = pathlib.Path(__file__).resolve().parent
-    db_dir = os.path.join(script_dir, "databases")
+def database_handler(script_dir: str, curr_db_dir: str, database: str):
+    """
 
-    # Get cmd arguments
-    args = arg_reader()
-
-    input_vcf = args.vcf
-    database = args.database
-    feature_table = args.feature_table
-    all_protein_fa = args.protein_fasta
-    run_interpro = args.interproscan
-    out_dir = args.out_dir
-
-    # Database logic
-    if not os.path.exists(db_dir):
-        os.mkdir(db_dir)
-
-    curr_db_dir = os.path.join(db_dir, database)
-    prot_fn = os.path.join(curr_db_dir, 'proteins.fa')
-    feat_fn = os.path.join(curr_db_dir, 'features.txt')
-    if not (os.path.exists(prot_fn) & os.path.exists(feat_fn)):
+    :param database:
+    :param script_dir:
+    :param curr_db_dir:
+    :return:
+    """
+    all_protein_fa = os.path.join(curr_db_dir, 'proteins.fa')
+    feature_table = os.path.join(curr_db_dir, 'features.txt')
+    if not (os.path.exists(all_protein_fa) & os.path.exists(feature_table)):
         config_dbs = parse_db_config(
             os.path.join(script_dir, "database.config")
         )
@@ -319,22 +309,50 @@ def main():
             feature_url = config_dbs[database]["feature_url"]
 
             # Download data
-            prot_cmd = f"wget -O {prot_fn + '.gz'} {protein_url}"
-            feat_cmd = f"wget -O {feat_fn + '.gz'} {feature_url}"
+            prot_cmd = f"wget -O {all_protein_fa + '.gz'} {protein_url}"
+            feat_cmd = f"wget -O {feature_table + '.gz'} {feature_url}"
             subprocess.run(prot_cmd, shell=True)
             subprocess.run(feat_cmd, shell=True)
 
             # Unzip data
-            subprocess.run(f"gunzip {prot_fn + '.gz'}", shell=True)
-            subprocess.run(f"gunzip {feat_fn + '.gz'}", shell=True)
+            subprocess.run(f"gunzip {all_protein_fa + '.gz'}", shell=True)
+            subprocess.run(f"gunzip {feature_table + '.gz'}", shell=True)
 
         else:
             raise Exception(f"Database {database} not found in database.config")
+    return all_protein_fa, feature_table
 
-    # If db does not exist, check for it in config, if there, make db
+
+
+def main():
+    script_dir = pathlib.Path(__file__).resolve().parent
+    db_dir = os.path.join(script_dir, "databases")
+
+    # Get cmd arguments
+    args = arg_reader()
+
+    input_vcf = args.vcf
+    database = args.database
+    run_interpro = args.interproscan
+    out_dir = args.out_dir
+
+    if args.protein_fasta is not None is not args.feature_table is not None:
+        raise Exception("-f and -p have to be submitted together")
+    if args.protein_fasta is not None and args.feature_table is not None:
+        all_protein_fa = args.protein_fasta
+        feature_table = args.feature_table
+        if database:
+            raise Exception("-f and -p options are incompatible with -d")
+    else:
+        if not os.path.exists(db_dir):
+            os.mkdir(db_dir)
+        curr_db_dir = os.path.join(db_dir, database)
+        all_protein_fa, feature_table = database_handler(
+            script_dir, curr_db_dir, database
+        )
+
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
-
 
     regions_file = os.path.join(out_dir, "regions.txt")
     out_vcf = os.path.join(out_dir, "genes.vcf")
