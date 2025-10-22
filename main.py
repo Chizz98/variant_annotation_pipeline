@@ -23,19 +23,27 @@ def arg_reader():
         "vcf",
         help="The input vcf file."
     )
-    arg_parser.add_argument(
+
+    database_group = arg_parser.add_argument_group(
+        title="Database method",
+        description="Either supply a database which is in the database.config "
+                    "in the main project folder with -d, or supply a feature "
+                    "table and protein fasta yourself using -f and -p."
+    )
+
+    database_group.add_argument(
         "-f", "--feature_table",
         help="Filename of feature table for your organism, downloadable from "
              "NCBI. Mutually exclusive with -d. Requires protein fasta to be "
              "supplied through -p."
     )
-    arg_parser.add_argument(
+    database_group.add_argument(
         "-p", "--protein_fasta",
         help="Fasta file containing the protein sequences of your organism."
              "Mutually exclusive with -d. Requires feature table to be supplied"
              " trough -f."
     )
-    arg_parser.add_argument(
+    database_group.add_argument(
         "-d",
         "--database",
         help="Internal database to query, mutually exclusive with -f and -p."
