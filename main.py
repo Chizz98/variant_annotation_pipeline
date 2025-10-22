@@ -371,6 +371,8 @@ def main():
     database = args.database
     run_interpro = args.interproscan
     out_dir = args.out_dir
+    genes = args.genes
+    gene_list = args.gene_file
 
     if bool(args.protein_fasta) != bool(args.feature_table):
         arg_parser.error("-f and -p have to be submitted together")
@@ -394,7 +396,11 @@ def main():
     out_vcf = os.path.join(out_dir, "genes.vcf")
 
     # Parse input file
-    gene_list = parse_gene_tsv("genes_test.txt")
+    if genes:
+        gene_list = genes.split(",")
+    else:
+        # To do rework for described file format in argparser
+        gene_list = parse_gene_tsv("genes_test.txt")
     
     # Parse feature table
     gene_dict, protein_dict = query_feature_table(
