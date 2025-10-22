@@ -24,11 +24,14 @@ def arg_reader():
         help="The input vcf file."
     )
 
-    database_group = arg_parser.add_argument_group(
+    database_group_top = arg_parser.add_argument_group(
         title="Database method",
         description="Either supply a database which is in the database.config "
                     "in the main project folder with -d, or supply a feature "
                     "table and protein fasta yourself using -f and -p."
+    )
+    database_group = database_group_top.add_mutually_exclusive_group(
+        required=True
     )
 
     database_group.add_argument(
