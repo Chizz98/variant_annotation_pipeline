@@ -26,12 +26,14 @@ def arg_reader():
     arg_parser.add_argument(
         "-f", "--feature_table",
         help="Filename of feature table for your organism, downloadable from "
-             "NCBI. Mutually exclusive with -d."
+             "NCBI. Mutually exclusive with -d. Requires protein fasta to be "
+             "supplied through -p."
     )
     arg_parser.add_argument(
         "-p", "--protein_fasta",
         help="Fasta file containing the protein sequences of your organism."
-             "Mutually exclusive with -d"
+             "Mutually exclusive with -d. Requires feature table to be supplied"
+             " trough -f."
     )
     arg_parser.add_argument(
         "-d",
