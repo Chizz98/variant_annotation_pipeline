@@ -60,13 +60,13 @@ def arg_reader():
     )
     gene_input_group.add_argument(
         "-g",
-        "-genes",
+        "--genes",
         help="Comma separated list of genes (or a single gene). No spaces "
              "between gene names."
     )
     gene_input_group.add_argument(
         "-G",
-        "-gene_file",
+        "--gene_file",
         help="Name of a file containing the gene names, with each line "
              "containing one gene name."
     )
