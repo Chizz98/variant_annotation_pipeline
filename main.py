@@ -126,14 +126,14 @@ def query_feature_table(
             feature = line[0]
             if gene_name in genes:
                 gene = list(set(line) & set(genes))[0]
-                chr, start_pos, stop_pos = line[6:9]
+                chr_name, start_pos, stop_pos = line[6:9]
                 if feature == "gene":
-                    gene_dict[gene] = [chr, start_pos, stop_pos]
+                    gene_dict[gene] = [chr_name, start_pos, stop_pos]
                 if feature == "mRNA":
                     protein_id = line[12]
                     mrna_id = line[10]
                     protein_dict[protein_id] = [
-                        gene, mrna_id, chr, start_pos, stop_pos
+                        gene, mrna_id, chr_name, start_pos, stop_pos
                     ]
     return gene_dict, protein_dict
 
@@ -257,7 +257,7 @@ def extract_protein_sequences(
         protein_fa_fn: str,
         protein_ids: list,
         out_fn: str
-) -> None:
+) -> dict:
     """ Extracts protein sequences from a protein fasta
 
     :param protein_fa_fn: input fasta with protein sequences.
