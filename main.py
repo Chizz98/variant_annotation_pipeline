@@ -359,6 +359,28 @@ def database_handler(script_dir: str, curr_db_dir: str, database: str):
     return all_protein_fa, feature_table
 
 
+def write_variant_table(
+        vcf_fn: str,
+        gene_dict: dict,
+        out_fn: str,
+        interpro_fn: str = ""
+) -> None:
+    """ Takes input VCF and writes variant table for downstream analysis
+
+    :param vcf_fn:
+    :param gene_dict:
+    :param out_fn:
+    :param interpro_fn:
+    :return:
+    """
+    # Write output table from VCF
+    header_cmd = f'echo - e "Chr\tPos\tRef_allele\tAlt_allele' \
+                 f'\tAllele_frequency\tInfo" > {out_fn}'
+    content_cmd = f"bcftools query - f'%CHROM\t%POS\t%REF\t%ALT\t%AF" \
+                  f"\t%INFO\n {vcf_fn} >> {out_fn}"
+    subprocess.run(header_cmd, shell=True)
+    subprocess.run(content_cmd, shell=True)
+
 
 def main():
     script_dir = pathlib.Path(__file__).resolve().parent
