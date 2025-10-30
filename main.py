@@ -88,20 +88,16 @@ def arg_reader():
 
 
 def parse_gene_tsv(gene_vcf_fn: str) -> list:
-    """ Reads gene name, position, and start and end positions from a csv
+    """ Reads gene names from a text file with one name per line
 
-    :param gene_vcf_fn: Filename of the input csv
+    :param gene_vcf_fn: Filename of the input file
     :return: List of gene names
     """
     out_list = []
 
     with open(gene_vcf_fn, "r") as infile:
-        header = infile.readline().strip("\n").split("\t")
         for line in infile:
-            line = line.strip("\n").split("\t")
-            gene = line[2]
-            if gene.startswith("LOC"):
-                out_list.append(gene)
+            out_list.append(line.strip())
     return out_list
 
 
@@ -373,13 +369,101 @@ def write_variant_table(
     :param interpro_fn:
     :return:
     """
+    temp_fn = out_fn.replace(".txt", "_temp.txt")
+    
     # Write output table from VCF
-    header_cmd = f'echo - e "Chr\tPos\tRef_allele\tAlt_allele' \
-                 f'\tAllele_frequency\tInfo" > {out_fn}'
-    content_cmd = f"bcftools query - f'%CHROM\t%POS\t%REF\t%ALT\t%AF" \
-                  f"\t%INFO\n {vcf_fn} >> {out_fn}"
+    header_cmd = f'printf "Chr\tPos\tRef_allele\tAlt_allele' \
+                 f'\tAllele_frequency\tInfo\n" > {temp_fn}'
+    content_cmd = f"bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t%AF" \
+                  f"\t%INFO\n' {vcf_fn} >> {temp_fn}"
     subprocess.run(header_cmd, shell=True)
     subprocess.run(content_cmd, shell=True)
+    
+    # Read variant table
+    with open(temp_fn) as infile, open(out_fn, "w") as outfile:
+        header = infile.readline().strip().split("\t")
+        header = ["Gene_name"] + header + ["Highest_predicted_impact"]
+        if interpro_fn != "":
+            header = header + ["Interproscan_annotation"]
+        outfile.write("\t".join(header) + "\n")
+        for line in infile:
+            line = line.strip().split()
+            chr_name_goi = line[0]
+            pos = int(line[1])
+            info_field = line[-1]
+            gene_found = False
+            # Add gene symbols
+            for gene, values in gene_dict.items():
+                chr_name = values[0]
+                if chr_name == chr_name_goi:
+                    start_pos = int(values[1])
+                    stop_pos = int(values[2])
+                    if (pos >= start_pos) and (pos <= stop_pos):
+                        line = [gene] + line
+                        gene_found = True
+            if not gene_found:
+                line = ["NA"] + line
+            # Add highest impact variant col
+            highest_impact_var = highest_impact_ann(info_field)
+            line = line + [highest_impact_var]
+            # Add interpro annotations
+            if interpro_fn != "":
+                found_annotations = []
+                pattern = re.compile(r'p\.[A-Za-z]{3}(\d+)(?:_[A-Za-z]{3}(\d+))?')
+                pattern_match = pattern.search(info_field)
+                if pattern_match:
+                    aa_start, aa_stop = pattern_match.groups()
+                    if aa_stop is None:
+                        aa_stop = aa_start
+                    aa_start = int(aa_start)
+                    aa_stop = int(aa_stop)
+                    with open(interpro_fn) as interpro_file:
+                        for interpro_line in interpro_file:
+                            interpro_line = interpro_line.strip().split("\t")
+                            annotation_start = int(interpro_line[6])
+                            annotation_stop = int(interpro_line[7])
+                            annotation_desc = interpro_line[5]
+                            start_within = (aa_start >= annotation_start) and (aa_start <= annotation_stop)
+                            stop_within = (aa_stop >= annotation_start) and (aa_stop <= annotation_stop)
+                            if start_within or stop_within:
+                                found_annotations.append(f"{annotation_desc}")
+                if found_annotations == []:
+                    line = line + ["No interproscan annotation"]
+                else:
+                    line = line + [",".join(set(found_annotations))]
+            outfile.write("\t".join(line) + "\n")
+    os.remove(temp_fn)
+
+
+def interpro_append_gene(interpro_fn: str, prot_dict: dict) -> None:
+    out_fn = interpro_fn.replace(".tsv", "_plus_gene_id.txt")
+    with open(interpro_fn) as infile, open(out_fn, "w") as outfile:
+        for line in infile:
+            line = line.strip().split("\t")
+            prot_id = line[0]
+            try:
+                gene_name = prot_dict[prot_id][0]
+            except:
+                raise Exception(f"No matching gene symbol for prot id {prot_id}")
+            out_line = [gene_name] + line
+            outfile.write("\t".join(out_line) + "\n")
+
+
+def highest_impact_ann(info_field: str) -> str:
+    impact_lut = {
+        "MODIFIER": 0,
+        "LOW": 1,
+        "MODERATE": 2,
+        "HIGH": 3
+        }
+    impact_match = re.findall(r"(?:ANN=|,)(?:[^|]+\|){2}([^|]+)", info_field)
+    highest_impact = ""
+    highest_score = -1
+    for impact in impact_match:
+        if impact_lut[impact] > highest_score:
+            highest_score = impact_lut[impact]
+            highest_impact = impact
+    return highest_impact
 
 
 def main():
@@ -395,7 +479,7 @@ def main():
     run_interpro = args.interproscan
     out_dir = args.out_dir
     genes = args.genes
-    gene_list = args.gene_file
+    gene_file = args.gene_file
 
     if bool(args.protein_fasta) != bool(args.feature_table):
         arg_parser.error("-f and -p have to be submitted together")
@@ -422,8 +506,7 @@ def main():
     if genes:
         gene_list = genes.split(",")
     else:
-        # To do rework for described file format in argparser
-        gene_list = parse_gene_tsv("genes_test.txt")
+        gene_list = parse_gene_tsv(gene_file)
     
     # Parse feature table
     gene_dict, protein_dict = query_feature_table(
@@ -444,12 +527,22 @@ def main():
     subprocess.run(bcftools_cmd, shell=True)
     
     # Run interpro query
+    interpro_out_fn = os.path.join(out_dir, 'interpro_results.tsv')
     if run_interpro:
         interpro_cmd = f"interproscan.sh -i {protein_fa} -f tsv -dp " \
-                       f"-appl Pfam -o " \
-                       f"{os.path.join(out_dir, 'interpro_results.tsv')}"
+                       f"-appl Pfam -o {interpro_out_fn}"
         subprocess.run(interpro_cmd, shell=True)
-
+        interpro_append_gene(interpro_out_fn, protein_dict)
+    
+    # Write tables for downstream analysis
+    variant_table_fn = os.path.join(out_dir, "variant_table.txt")
+    if run_interpro:
+        write_variant_table(out_vcf, gene_dict, variant_table_fn, interpro_out_fn)
+        # Remove interpro file without gene names
+        os.remove(interpro_out_fn)
+    else:
+        write_variant_table(out_vcf, gene_dict, variant_table_fn)
+    
 
 if __name__ == "__main__":
     main()
