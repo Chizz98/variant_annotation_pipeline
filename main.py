@@ -456,7 +456,8 @@ def highest_impact_ann(info_field: str) -> str:
         "MODERATE": 2,
         "HIGH": 3
         }
-    impact_match = re.findall(r"(?:ANN=|,)(?:[^|]+\|){2}([^|]+)", info_field)
+    annotation_field = re.search(r"(ANN[^;]+)", info_field).groups()[0]
+    impact_match = re.findall(r"(?:ANN=|,)(?:[^|]+\|){2}([^|]+)", annotation_field)
     highest_impact = ""
     highest_score = -1
     for impact in impact_match:
