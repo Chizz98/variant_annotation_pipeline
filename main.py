@@ -393,16 +393,19 @@ def write_variant_table(
             info_field = line[-1]
             gene_found = False
             # Add gene symbols
+            gene_symbols = []
             for gene, values in gene_dict.items():
                 chr_name = values[0]
                 if chr_name == chr_name_goi:
                     start_pos = int(values[1])
                     stop_pos = int(values[2])
                     if (pos >= start_pos) and (pos <= stop_pos):
-                        line = [gene] + line
+                        gene_symbols.append(gene)
                         gene_found = True
             if not gene_found:
                 line = ["NA"] + line
+            else:
+                line = [",".join(gene_symbols)] + line
             # Add highest impact variant col
             highest_impact_var = highest_impact_ann(info_field)
             line = line + [highest_impact_var]
