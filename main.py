@@ -363,11 +363,12 @@ def write_variant_table(
 ) -> None:
     """ Takes input VCF and writes variant table for downstream analysis
 
-    :param vcf_fn:
-    :param gene_dict:
-    :param out_fn:
-    :param interpro_fn:
-    :return:
+    :param vcf_fn: Filename of the input vcf (has to be snpEff annotated).
+    :param gene_dict: Gene dict output by query_feature_table.
+    :param out_fn: Filename to write the file to.
+    :param interpro_fn: Interporscan output, if left as empty str no interpro
+        output will be added to the table in out_fn.
+    :return: None, writes text file for downstream analysis.
     """
     temp_fn = out_fn.replace(".txt", "_temp.txt")
     
@@ -439,6 +440,12 @@ def write_variant_table(
 
 
 def interpro_append_gene(interpro_fn: str, prot_dict: dict) -> None:
+    """ Appends gene name to interproscan output
+
+    :param interpro_fn: Filename of the interpro output file.
+    :param prot_dict: Protein dict output by query_feature_table.
+    :return: None, writes interpro table with gene symbol as first col.
+    """
     out_fn = interpro_fn.replace(".tsv", "_plus_gene_id.txt")
     with open(interpro_fn) as infile, open(out_fn, "w") as outfile:
         for line in infile:
@@ -447,7 +454,9 @@ def interpro_append_gene(interpro_fn: str, prot_dict: dict) -> None:
             try:
                 gene_name = prot_dict[prot_id][0]
             except:
-                raise Exception(f"No matching gene symbol for prot id {prot_id}")
+                raise Exception(
+                    f"No matching gene symbol for prot id {prot_id}"
+                )
             out_line = [gene_name] + line
             outfile.write("\t".join(out_line) + "\n")
 
@@ -465,7 +474,10 @@ def highest_impact_ann(info_field: str) -> str:
         "HIGH": 3
         }
     annotation_field = re.search(r"(ANN[^;]+)", info_field).groups()[0]
-    impact_match = re.findall(r"(?:ANN=|,)(?:[^|]+\|){2}([^|]+)", annotation_field)
+    impact_match = re.findall(
+        r"(?:ANN=|,)(?:[^|]+\|){2}([^|]+)",
+        annotation_field
+    )
     highest_impact = ""
     highest_score = -1
     for impact in impact_match:
