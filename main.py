@@ -453,6 +453,11 @@ def interpro_append_gene(interpro_fn: str, prot_dict: dict) -> None:
 
 
 def highest_impact_ann(info_field: str) -> str:
+    """ Reads a SnpEff info field and outputs the highest impact annotation
+
+    :param info_field: Info field from snpEff annotated vcf.
+    :return: Highest impact annotation in info field.
+    """
     impact_lut = {
         "MODIFIER": 0,
         "LOW": 1,
