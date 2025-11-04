@@ -558,7 +558,9 @@ def main():
     # Write tables for downstream analysis
     variant_table_fn = os.path.join(out_dir, "variant_table.txt")
     if run_interpro:
-        write_variant_table(out_vcf, gene_dict, variant_table_fn, interpro_out_fn)
+        write_variant_table(
+            out_vcf, gene_dict, variant_table_fn, interpro_out_fn
+        )
         # Remove interpro file without gene names
         os.remove(interpro_out_fn)
     else:
@@ -567,10 +569,10 @@ def main():
     # Write variant matrix
     variant_matrix_fn = os.path.join(out_dir, "variant_matrix.txt")
     matrix_header_cmd = f'echo - e "Variant\t$(bcftools query -l ' \
-                        f'test_gene.ann.vcf | tr \'\n\' \'\t\')" > ' \
+                        f'{out_vcf} | tr \'\n\' \'\t\')" > ' \
                         f'{variant_matrix_fn}'
     matrix_cmd = f"bcftools query -f '%CHROM-%POS-%REF-%ALT[\t%GT]\n' " \
-                 f"test_gene.ann.vcf >> {variant_matrix_fn}"
+                 f"{out_vcf} >> {variant_matrix_fn}"
     subprocess.run(matrix_header_cmd, shell=True)
     subprocess.run(matrix_cmd, shell=True)
 
