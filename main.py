@@ -563,7 +563,17 @@ def main():
         os.remove(interpro_out_fn)
     else:
         write_variant_table(out_vcf, gene_dict, variant_table_fn)
-    
+
+    # Write variant matrix
+    variant_matrix_fn = os.path.join(out_dir, "variant_matrix.txt")
+    matrix_header_cmd = f'echo - e "Variant\t$(bcftools query -l ' \
+                        f'test_gene.ann.vcf | tr \'\n\' \'\t\')" > ' \
+                        f'{variant_matrix_fn}'
+    matrix_cmd = f"bcftools query -f '%CHROM-%POS-%REF-%ALT[\t%GT]\n' " \
+                 f"test_gene.ann.vcf >> {variant_matrix_fn}"
+    subprocess.run(matrix_header_cmd, shell=True)
+    subprocess.run(matrix_cmd, shell=True)
+
 
 if __name__ == "__main__":
     main()
